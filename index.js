@@ -11,14 +11,7 @@ const PORT = process.env.PORT || 3000;
 // MIDDLEWARE
 // ============================================================
 app.use(cors());
-app.use(express.static('public'));
-```
-
-**3. Commit changes**
-
-A Vercel vai fazer redeploy. Depois acesse:
-```
-https://cyclica-chatbot-kvd5.vercel.app/
+app.use(express.json());
 
 // ============================================================
 // INICIALIZAÇÃO
