@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cyclica - Selection Process</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #fff7e7;
+      min-height: 100vh;
+      color: #171733;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 60px 30px;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .logo {
+      background: linear-gradient(135deg, #9e122c 0%, #ee6a43 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-size: 3.5em;
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: -1.5px;
+      font-style: italic;
+    }
+
+    .tagline {
+      color: #6a92a6;
+      font-size: 1.2em;
+      font-weight: 500;
+      font-style: italic;
+    }
+
+    /* Welcome Screen */
+    .welcome-section {
+      background: white;
+      border-radius: 24px;
+      padding: 50px;
+      margin-bottom: 40px;
+      box-shadow: 0 4px 20px rgba(23, 23, 51, 0.06);
+    }
+
+    .welcome-section h2 {
+      color: #171733;
+      font-size: 1.6em;
+      margin-bottom: 25px;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+
+    .welcome-section p {
+      color: #171733;
+      font-size: 1.05em;
+      line-height: 1.8;
+      margin-bottom: 20px;
+    }
+
+    .welcome-section p strong {
+      font-weight: 600;
+    }
+
+    .intro-text {
+      margin-bottom: 35px;
+    }
+
+    .section-title {
+      color: #6a92a6;
+      font-size: 1.1em;
+      font-weight: 600;
+      margin: 35px 0 20px 0;
+    }
+
+    /* Choice Cards */
+    .choices {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 25px;
+      margin: 35px 0;
+    }
+
+    .choice-card {
+      background: linear-gradient(135deg, #6a92a6 0%, #b7c6ce 100%);
+      border-radius: 20px;
+      padding: 35px 30px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 3px solid transparent;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .choice-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg, rgba(158, 18, 44, 0.9) 0%, rgba(238, 106, 67, 0.9) 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .choice-card:hover::before {
+      opacity: 1;
+    }
+
+    .choice-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 30px rgba(106, 146, 166, 0.3);
+    }
+
+    .choice-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .choice-card h3 {
+      color: white;
+      font-size: 1.4em;
+      margin-bottom: 15px;
+      font-weight: 700;
+    }
+
+    .choice-card p {
+      color: rgba(255, 247, 231, 0.95);
+      font-size: 0.98em;
+      line-height: 1.7;
+      margin: 0;
+    }
+
+    /* Consent */
+    .consent {
+      background: rgba(106, 146, 166, 0.08);
+      border-left: 4px solid #6a92a6;
+      border-radius: 12px;
+      padding: 20px 25px;
+      margin: 35px 0;
+    }
+
+    .consent p {
+      font-size: 0.95em;
+      color: #171733;
+      margin: 0;
+      font-style: italic;
+    }
+
+    .welcome-footer {
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    .welcome-footer p {
+      color: #6a92a6;
+      font-size: 1.05em;
+      font-style: italic;
+      margin: 0;
+    }
+
+    /* Chat Interface */
+    .chat-container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .messages-wrapper {
+      background: white;
+      border-radius: 24px;
+      padding: 40px;
+      margin-bottom: 25px;
+      box-shadow: 0 4px 20px rgba(23, 23, 51, 0.06);
+      min-height: 400px;
+      max-height: 600px;
+      overflow-y: auto;
+    }
+
+    .message {
+      margin-bottom: 20px;
+      padding: 18px 24px;
+      border-radius: 18px;
+      max-width: 80%;
+      line-height: 1.7;
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .user-message {
+      background: #6a92a6;
+      color: white;
+      margin-left: auto;
+      border-bottom-right-radius: 6px;
+    }
+
+    .bot-message {
+      background: #b7c6ce;
+      color: #171733;
+      border-bottom-left-radius: 6px;
+    }
+
+    .system-message {
+      background: linear-gradient(135deg, rgba(158, 18, 44, 0.1) 0%, rgba(238, 106, 67, 0.1) 100%);
+      color: #171733;
+      text-align: center;
+      padding: 16px 24px;
+      border-radius: 12px;
+      font-size: 0.98em;
+      font-weight: 500;
+      margin: 30px auto;
+      max-width: 85%;
+      border-left: 4px solid #9e122c;
+    }
+
+    .question-card {
+      background: white;
+      border: 2px solid #b7c6ce;
+      border-radius: 18px;
+      padding: 30px;
+      margin-bottom: 25px;
+    }
+
+    .question-number {
+      color: #9e122c;
+      font-size: 0.9em;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 15px;
+    }
+
+    .question-text {
+      color: #171733;
+      font-size: 1.15em;
+      line-height: 1.7;
+      font-weight: 500;
+    }
+
+    /* Input Area */
+    .input-section {
+      background: white;
+      border-radius: 20px;
+      padding: 25px;
+      box-shadow: 0 4px 20px rgba(23, 23, 51, 0.06);
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 120px;
+      padding: 18px;
+      border: 2px solid #b7c6ce;
+      border-radius: 14px;
+      font-size: 1em;
+      font-family: 'DM Sans', sans-serif;
+      resize: vertical;
+      transition: all 0.3s;
+      background: #fff7e7;
+      color: #171733;
+      margin-bottom: 15px;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: #6a92a6;
+      background: white;
+    }
+
+    textarea::placeholder {
+      color: #b7c6ce;
+    }
+
+    .chat-input-row {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .chat-input-row input {
+      flex: 1;
+      padding: 16px 20px;
+      border: 2px solid #b7c6ce;
+      border-radius: 14px;
+      font-size: 1em;
+      font-family: 'DM Sans', sans-serif;
+      background: #fff7e7;
+      color: #171733;
+      transition: all 0.3s;
+    }
+
+    .chat-input-row input:focus {
+      outline: none;
+      border-color: #6a92a6;
+      background: white;
+    }
+
+    .chat-input-row input::placeholder {
+      color: #b7c6ce;
+    }
+
+    /* Buttons */
+    .button {
+      background: linear-gradient(135deg, #9e122c 0%, #ee6a43 100%);
+      color: white;
+      border: none;
+      padding: 16px 32px;
+      border-radius: 12px;
+      font-size: 1em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(158, 18, 44, 0.25);
+      font-family: 'DM Sans', sans-serif;
+    }
+
+    .button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(158, 18, 44, 0.35);
+    }
+
+    .button:disabled {
+      background: #b7c6ce;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .button-full {
+      width: 100%;
+    }
+
+    /* Feedback */
+    .feedback-card {
+      background: white;
+      border: 3px solid #6a92a6;
+      border-radius: 20px;
+      padding: 40px;
+      margin: 30px 0;
+      text-align: center;
+    }
+
+    .feedback-card h2 {
+      background: linear-gradient(135deg, #9e122c 0%, #ee6a43 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-size: 1.9em;
+      margin-bottom: 25px;
+      font-weight: 700;
+    }
+
+    .feedback-text {
+      color: #171733;
+      line-height: 1.9;
+      font-size: 1.08em;
+      margin-bottom: 25px;
+    }
+
+    .transition-text {
+      color: #6a92a6;
+      font-style: italic;
+      font-size: 1.05em;
+      margin-top: 20px;
+    }
+
+    /* Loading */
+    .loading {
+      text-align: center;
+      padding: 25px;
+      color: #6a92a6;
+      font-style: italic;
+    }
+
+    .loading::after {
+      content: '...';
+      animation: dots 1.5s infinite;
+    }
+
+    @keyframes dots {
+      0%, 20% { content: '.'; }
+      40% { content: '..'; }
+      60%, 100% { content: '...'; }
+    }
+
+    /* Error */
+    .error {
+      background: rgba(158, 18, 44, 0.1);
+      border: 2px solid #9e122c;
+      border-radius: 14px;
+      padding: 18px 24px;
+      color: #9e122c;
+      margin: 25px 0;
+      text-align: center;
+    }
+
+    /* Utility */
+    .hidden {
+      display: none;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .container {
+        padding: 40px 20px;
+      }
+
+      .logo {
+        font-size: 2.5em;
+      }
+
+      .welcome-section {
+        padding: 35px 25px;
+      }
+
+      .choices {
+        grid-template-columns: 1fr;
+      }
+
+      .messages-wrapper {
+        padding: 25px 20px;
+      }
+
+      .message {
+        max-width: 90%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="logo">Cyclica</div>
+      <div class="tagline">Rhythm that makes you grow.</div>
+    </div>
+
+    <!-- Welcome Screen -->
+    <div id="welcomeScreen">
+      <div class="welcome-section">
+        <h2>We're happy you're here.</h2>
+        
+        <div class="intro-text">
+          <p>This is the first step of our selection process — a space designed for conversation, reflection, and mutual understanding.</p>
+          
+          <p>At Cyclica, we believe that work is shaped by people, rhythms, and relationships. Instead of focusing only on skills or past experiences, we'd like to understand how you relate to flexibility, well-being, collaboration, and sustainable growth.</p>
+        </div>
+
+        <p class="section-title">Choose how you'd like to begin your journey with us:</p>
+
+        <div class="choices">
+          <div class="choice-card" onclick="selectOption('assessment')">
+            <div class="choice-content">
+              <h3>Take Assessment</h3>
+              <p>Take a short cultural fit questionnaire to reflect on how your values and ways of working align with Cyclica's culture. There are no right or wrong answers — just an opportunity to share your perspective.</p>
+            </div>
+          </div>
+
+          <div class="choice-card" onclick="selectOption('chat')">
+            <div class="choice-content">
+              <h3>Chat Freely</h3>
+              <p>Start an open conversation to learn more about Cyclica's culture, values, and work environment. Ask questions, explore ideas, and get to know how we see work and growth.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="consent">
+          <p>By continuing, you agree to the secure storage of this conversation for academic purposes.</p>
+        </div>
+
+        <div class="welcome-footer">
+          <p>Take your time. Choose the path that feels right for you. We're glad to meet you.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error Messages -->
+    <div id="error" class="error hidden"></div>
+
+    <!-- Loading -->
+    <div id="loading" class="loading hidden">
+      Processing your response
+    </div>
+
+    <!-- Chat Interface -->
+    <div id="chatInterface" class="hidden">
+      <div class="chat-container">
+        <div class="messages-wrapper" id="messagesArea">
+          <!-- Messages will appear here -->
+        </div>
+
+        <!-- Assessment Input -->
+        <div id="assessmentInput" class="input-section hidden">
+          <textarea 
+            id="answerInput" 
+            placeholder="Share your thoughts here..."
+            rows="4"
+          ></textarea>
+          <button class="button button-full" onclick="submitAnswer()">
+            Submit Answer
+          </button>
+        </div>
+
+        <!-- Free Chat Input -->
+        <div id="chatInput" class="input-section hidden">
+          <div class="chat-input-row">
+            <input 
+              type="text" 
+              id="messageInput" 
+              placeholder="Type your message..."
+              onkeypress="handleKeypress(event)"
+            />
+            <button class="button" onclick="sendMessage()">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = 'https://cyclica-chatbot-kvd5.vercel.app';
+    let sessionId = null;
+    let currentMode = null;
+    let currentQuestionId = 0;
+    let totalQuestions = 5;
+
+    // Select Mode
+    async function selectOption(mode) {
+      currentMode = mode;
+      
+      document.getElementById('welcomeScreen').classList.add('hidden');
+      document.getElementById('chatInterface').classList.remove('hidden');
+
+      try {
+        const response = await fetch(`${API_URL}/start-session`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+        const data = await response.json();
+        sessionId = data.session_id;
+        totalQuestions = data.total_questions;
+
+        if (mode === 'assessment') {
+          currentQuestionId = 1;
+          addQuestion(data.first_question, 1);
+          document.getElementById('assessmentInput').classList.remove('hidden');
+        } else {
+          addSystemMessage("Welcome! Feel free to ask me anything about Cyclica's culture, values, or work environment.");
+          document.getElementById('chatInput').classList.remove('hidden');
+        }
+      } catch (error) {
+        showError('Failed to start session. Please make sure the API is running.');
+      }
+    }
+
+    // Add Question
+    function addQuestion(text, num) {
+      const area = document.getElementById('messagesArea');
+      const div = document.createElement('div');
+      div.innerHTML = `
+        <div class="question-card">
+          <div class="question-number">Question ${num} of ${totalQuestions}</div>
+          <div class="question-text">${text}</div>
+        </div>
+      `;
+      area.appendChild(div);
+      scrollToBottom();
+    }
+
+    // Add User Message
+    function addUserMessage(text) {
+      const area = document.getElementById('messagesArea');
+      const div = document.createElement('div');
+      div.className = 'message user-message';
+      div.textContent = text;
+      area.appendChild(div);
+      scrollToBottom();
+    }
+
+    // Add Bot Message
+    function addBotMessage(text) {
+      const area = document.getElementById('messagesArea');
+      const div = document.createElement('div');
+      div.className = 'message bot-message';
+      div.textContent = text;
+      area.appendChild(div);
+      scrollToBottom();
+    }
+
+    // Add System Message
+    function addSystemMessage(text) {
+      const area = document.getElementById('messagesArea');
+      const div = document.createElement('div');
+      div.className = 'message system-message';
+      div.textContent = text;
+      area.appendChild(div);
+      scrollToBottom();
+    }
+
+    // Add Feedback
+    function addFeedback(feedback, transition) {
+      const area = document.getElementById('messagesArea');
+      const div = document.createElement('div');
+      div.innerHTML = `
+        <div class="feedback-card">
+          <h2>Assessment Complete</h2>
+          <div class="feedback-text">${feedback}</div>
+          <div class="transition-text">${transition}</div>
+        </div>
+      `;
+      area.appendChild(div);
+      scrollToBottom();
+    }
+
+    // Submit Answer
+    async function submitAnswer() {
+      const answer = document.getElementById('answerInput').value.trim();
+      
+      if (!answer) {
+        alert('Please provide an answer before submitting.');
+        return;
+      }
+
+      addUserMessage(answer);
+      document.getElementById('answerInput').value = '';
+      
+      showLoading(true);
+
+      try {
+        const response = await fetch(`${API_URL}/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            session_id: sessionId,
+            message: answer,
+            question_id: currentQuestionId,
+            phase: 'questionnaire'
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.type === 'next_question') {
+          currentQuestionId++;
+          addQuestion(data.question, currentQuestionId);
+        } else if (data.type === 'questionnaire_complete') {
+          document.getElementById('assessmentInput').classList.add('hidden');
+          addFeedback(data.feedback, data.message);
+          
+          setTimeout(() => {
+            addSystemMessage("The chat is now open. Feel free to ask anything!");
+            document.getElementById('chatInput').classList.remove('hidden');
+            currentMode = 'chat';
+          }, 1500);
+        }
+      } catch (error) {
+        showError('Failed to submit. Please try again.');
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    // Send Message
+    async function sendMessage() {
+      const input = document.getElementById('messageInput');
+      const message = input.value.trim();
+      
+      if (!message) return;
+
+      addUserMessage(message);
+      input.value = '';
+
+      showLoading(true);
+
+      try {
+        const response = await fetch(`${API_URL}/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            session_id: sessionId,
+            message: message,
+            phase: 'free_chat'
+          })
+        });
+
+        const data = await response.json();
+        
+        if (data.type === 'chat_response') {
+          addBotMessage(data.message);
+        }
+      } catch (error) {
+        addBotMessage('Sorry, I encountered an error. Please try again.');
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    // Handle Enter
+    function handleKeypress(event) {
+      if (event.key === 'Enter') {
+        sendMessage();
+      }
+    }
+
+    // Show Loading
+    function showLoading(show) {
+      document.getElementById('loading').classList.toggle('hidden', !show);
+    }
+
+    // Show Error
+    function showError(message) {
+      const errorDiv = document.getElementById('error');
+      errorDiv.textContent = message;
+      errorDiv.classList.remove('hidden');
+      setTimeout(() => errorDiv.classList.add('hidden'), 5000);
+    }
+
+    // Scroll to Bottom
+    function scrollToBottom() {
+      setTimeout(() => {
+        const area = document.getElementById('messagesArea');
+        area.scrollTop = area.scrollHeight;
+      }, 100);
+    }
+  </script>
+</body>
+</html>
