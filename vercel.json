@@ -1,7 +1,8 @@
 {
   "version": 2,
-  "rewrites": [
-    { "source": "/chat", "destination": "/chat.html" },
-    { "source": "/(.*)", "destination": "/index.js" }
+  "routes": [
+    { "src": "/chat-compact.html", "dest": "/chat-compact.html" },
+    { "src": "/chat.html", "dest": "/chat.html" },
+    { "src": "/(.*)", "dest": "/index.js" }
   ]
 }
