@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cyclica - Selection Process</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif; background: #fff7e7; width: 1512px; height: 982px; color: #171733; line-height: 1.5; overflow: hidden; }
+    .container { width: 100%; height: 100%; padding: 30px 40px; display: flex; flex-direction: column; }
+    .header { text-align: center; margin-bottom: 25px; }
+    .logo { background: linear-gradient(135deg, #9e122c 0%, #ee6a43 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-size: 2.2em; font-weight: 700; margin-bottom: 5px; letter-spacing: -1px; font-style: italic; }
+    .tagline { color: #6a92a6; font-size: 0.95em; font-weight: 500; font-style: italic; }
+    .welcome-section { background: white; border-radius: 18px; padding: 30px 35px; box-shadow: 0 3px 15px rgba(23, 23, 51, 0.06); flex: 1; display: flex; flex-direction: column; overflow-y: auto; }
+    .welcome-section h2 { color: #171733; font-size: 1.3em; margin-bottom: 15px; font-weight: 600; line-height: 1.3; }
+    .welcome-section p { color: #171733; font-size: 0.92em; line-height: 1.6; margin-bottom: 12px; }
+    .intro-text { margin-bottom: 20px; }
+    .section-title { color: #6a92a6; font-size: 0.95em; font-weight: 600; margin: 20px 0 15px 0; }
+    .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin: 20px 0; }
+    .choice-card { background: linear-gradient(135deg, #6a92a6 0%, #b7c6ce 100%); border-radius: 16px; padding: 25px 22px; cursor: pointer; transition: all 0.3s ease; position: relative; overflow: hidden; }
+    .choice-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(135deg, rgba(158, 18, 44, 0.9) 0%, rgba(238, 106, 67, 0.9) 100%); opacity: 0; transition: opacity 0.3s ease; }
+    .choice-card:hover::before { opacity: 1; }
+    .choice-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(106, 146, 166, 0.3); }
+    .choice-content { position: relative; z-index: 1; }
+    .choice-card h3 { color: white; font-size: 1.15em; margin-bottom: 10px; font-weight: 700; }
+    .choice-card p { color: rgba(255, 247, 231, 0.95); font-size: 0.88em; line-height: 1.5; margin: 0; }
+    .consent { background: rgba(106, 146, 166, 0.08); border-left: 3px solid #6a92a6; border-radius: 10px; padding: 14px 18px; margin: 20px 0; }
+    .consent p { font-size: 0.85em; color: #171733; margin: 0; font-style: italic; }
+    .welcome-footer { text-align: center; margin-top: 15px; }
+    .welcome-footer p { color: #6a92a6; font-size: 0.92em; font-style: italic; margin: 0; }
+    .chat-container { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .messages-wrapper { background: white; border-radius: 18px; padding: 25px; box-shadow: 0 3px 15px rgba(23, 23, 51, 0.06); flex: 1; overflow-y: auto; margin-bottom: 15px; }
+    .message { margin-bottom: 12px; padding: 12px 16px; border-radius: 14px; max-width: 75%; line-height: 1.5; font-size: 0.92em; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .user-message { background: #6a92a6; color: white; margin-left: auto; border-bottom-right-radius: 4px; }
+    .bot-message { background: #b7c6ce; color: #171733; border-bottom-left-radius: 4px; }
+    .system-message { background: linear-gradient(135deg, rgba(158, 18, 44, 0.1) 0%, rgba(238, 106, 67, 0.1) 100%); color: #171733; text-align: center; padding: 10px 16px; border-radius: 10px; font-size: 0.88em; font-weight: 500; margin: 20px auto; max-width: 80%; border-left: 3px solid #9e122c; }
+    .question-card { background: white; border: 2px solid #b7c6ce; border-radius: 14px; padding: 20px; margin-bottom: 15px; }
+    .question-number { color: #9e122c; font-size: 0.8em; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+    .question-text { color: #171733; font-size: 1em; line-height: 1.5; font-weight: 500; }
+    .input-section { background: white; border-radius: 16px; padding: 18px; box-shadow: 0 3px 15px rgba(23, 23, 51, 0.06); }
+    textarea { width: 100%; min-height: 90px; padding: 14px; border: 2px solid #b7c6ce; border-radius: 12px; font-size: 0.92em; font-family: 'DM Sans', sans-serif; resize: vertical; transition: all 0.3s; background: #fff7e7; color: #171733; margin-bottom: 12px; }
+    textarea:focus { outline: none; border-color: #6a92a6; background: white; }
+    textarea::placeholder { color: #b7c6ce; }
+    .chat-input-row { display: flex; gap: 10px; align-items: center; }
+    .chat-input-row input { flex: 1; padding: 12px 16px; border: 2px solid #b7c6ce; border-radius: 12px; font-size: 0.92em; font-family: 'DM Sans', sans-serif; background: #fff7e7; color: #171733; transition: all 0.3s; }
+    .chat-input-row input:focus { outline: none; border-color: #6a92a6; background: white; }
+    .chat-input-row input::placeholder { color: #b7c6ce; }
+    .button { background: linear-gradient(135deg, #9e122c 0%, #ee6a43 100%); color: white; border: none; padding: 12px 26px; border-radius: 10px; font-size: 0.92em; font-weight: 600; cursor: pointer; transition: all 0.3s; box-shadow: 0 3px 12px rgba(158, 18, 44, 0.25); font-family: 'DM Sans', sans-serif; }
+    .button:hover { transform: translateY(-2px); box-shadow: 0 5px 16px rgba(158, 18, 44, 0.35); }
+    .button:disabled { background: #b7c6ce; cursor: not-allowed; transform: none; box-shadow: none; }
+    .button-full { width: 100%; }
+    .feedback-card { background: white; border: 3px solid #6a92a6; border-radius: 16px; padding: 30px; margin: 20px 0; text-align: center; }
+    .feedback-card h2 { background: linear-gradient(135deg, #9e122c 0%, #ee6a43 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-size: 1.5em; margin-bottom: 18px; font-weight: 700; }
+    .feedback-text { color: #171733; line-height: 1.7; font-size: 0.95em; margin-bottom: 18px; }
+    .transition-text { color: #6a92a6; font-style: italic; font-size: 0.92em; margin-top: 15px; }
+    .loading { text-align: center; padding: 18px; color: #6a92a6; font-style: italic; font-size: 0.92em; }
+    .loading::after { content: '...'; animation: dots 1.5s infinite; }
+    @keyframes dots { 0%, 20% { content: '.'; } 40% { content: '..'; } 60%, 100% { content: '...'; } }
+    .error { background: rgba(158, 18, 44, 0.1); border: 2px solid #9e122c; border-radius: 12px; padding: 14px 18px; color: #9e122c; margin: 18px 0; text-align: center; font-size: 0.9em; }
+    .hidden { display: none; }
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb { background: #b7c6ce; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #6a92a6; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo">Cyclica</div>
+      <div class="tagline">Rhythm that makes you grow.</div>
+    </div>
+    <div id="welcomeScreen" class="welcome-section">
+      <h2>We're happy you're here.</h2>
+      <div class="intro-text">
+        <p>This is the first step of our selection process — a space designed for conversation, reflection, and mutual understanding.</p>
+        <p>At Cyclica, we believe that work is shaped by people, rhythms, and relationships. Instead of focusing only on skills or past experiences, we'd like to understand how you relate to flexibility, well-being, collaboration, and sustainable growth.</p>
+      </div>
+      <p class="section-title">Choose how you'd like to begin your journey with us:</p>
+      <div class="choices">
+        <div class="choice-card" onclick="selectOption('assessment')">
+          <div class="choice-content">
+            <h3>Take Assessment</h3>
+            <p>Take a short cultural fit questionnaire to reflect on how your values and ways of working align with Cyclica's culture. There are no right or wrong answers — just an opportunity to share your perspective.</p>
+          </div>
+        </div>
+        <div class="choice-card" onclick="selectOption('chat')">
+          <div class="choice-content">
+            <h3>Chat Freely</h3>
+            <p>Start an open conversation to learn more about Cyclica's culture, values, and work environment. Ask questions, explore ideas, and get to know how we see work and growth.</p>
+          </div>
+        </div>
+      </div>
+      <div class="consent">
+        <p>By continuing, you agree to the secure storage of this conversation for academic purposes.</p>
+      </div>
+      <div class="welcome-footer">
+        <p>Take your time. Choose the path that feels right for you. We're glad to meet you.</p>
+      </div>
+    </div>
+    <div id="error" class="error hidden"></div>
+    <div id="loading" class="loading hidden">Processing your response</div>
+    <div id="chatInterface" class="hidden" style="display: flex; flex-direction: column; flex: 1;">
+      <div class="chat-container">
+        <div class="messages-wrapper" id="messagesArea"></div>
+        <div id="assessmentInput" class="input-section hidden">
+          <textarea id="answerInput" placeholder="Share your thoughts here..." rows="3"></textarea>
+          <button class="button button-full" onclick="submitAnswer()">Submit Answer</button>
+        </div>
+        <div id="chatInput" class="input-section hidden">
+          <div class="chat-input-row">
+            <input type="text" id="messageInput" placeholder="Type your message..." onkeypress="handleKeypress(event)" />
+            <button class="button" onclick="sendMessage()">Send</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    const API_URL = 'https://cyclica-chatbot-9vto.vercel.app';
+    let sessionId = null;
+    let currentMode = null;
+    let currentQuestionId = 0;
+    let totalQuestions = 5;
+    async function selectOption(mode) {
+      currentMode = mode;
+      document.getElementById('welcomeScreen').classList.add('hidden');
+      document.getElementById('chatInterface').classList.remove('hidden');
+      try {
+        const response = await fetch(API_URL + '/start-session', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+        const data = await response.json();
+        sessionId = data.session_id;
+        totalQuestions = data.total_questions;
+        if (mode === 'assessment') {
+          currentQuestionId = 1;
+          addQuestion(data.first_question, 1);
+          document.getElementById('assessmentInput').classList.remove('hidden');
+        } else {
+          addSystemMessage("Welcome! Feel free to ask me anything about Cyclica's culture, values, or work environment.");
+          document.getElementById('chatInput').classList.remove('hidden');
+        }
+      } catch (error) {
+        showError('Failed to start session. Please try again.');
+      }
+    }
+    function addQuestion(text, num) {
+      const area = document.getElementById('messagesArea');
+      const div = document.createElement('div');
+      div.innerHTML = '<div class="question-card"><div class="question-number">Question ' + num + ' of ' + totalQuestions + '</div><div class="question-text">' + text + '</div></div>';
+      area.appendChild(div);
+      scrollToBottom();
+    }
+    function addUserMessage(text) {
+      const area = document.getElementById('messagesArea');
+      const div = document.createElement('div');
+      div.className = 'message user-message';
+      div.textContent = text;
+      area.appendChild(div);
+      scrollToBottom();
+    }
+    function addBotMessage(text) {
+      const area = document.getElementById('messagesArea');
+      const div = document.createElement('div');
+      div.className = 'message bot-message';
+      div.textContent = text;
+      area.appendChild(div);
+      scrollToBottom();
+    }
+    function addSystemMessage(text) {
+      const area = document.getElementById('messagesArea');
+      const div = document.createElement('div');
+      div.className = 'message system-message';
+      div.textContent = text;
+      area.appendChild(div);
+      scrollToBottom();
+    }
+    function addFeedback(feedback, transition) {
+      const area = document.getElementById('messagesArea');
+      const div = document.createElement('div');
+      div.innerHTML = '<div class="feedback-card"><h2>Assessment Complete</h2><div class="feedback-text">' + feedback + '</div><div class="transition-text">' + transition + '</div></div>';
+      area.appendChild(div);
+      scrollToBottom();
+    }
+    async function submitAnswer() {
+      const answer = document.getElementById('answerInput').value.trim();
+      if (!answer) { alert('Please provide an answer before submitting.'); return; }
+      addUserMessage(answer);
+      document.getElementById('answerInput').value = '';
+      showLoading(true);
+      try {
+        const response = await fetch(API_URL + '/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ session_id: sessionId, message: answer, question_id: currentQuestionId, phase: 'questionnaire' }) });
+        const data = await response.json();
+        if (data.type === 'next_question') {
+          currentQuestionId++;
+          addQuestion(data.question, currentQuestionId);
+        } else if (data.type === 'questionnaire_complete') {
+          document.getElementById('assessmentInput').classList.add('hidden');
+          addFeedback(data.feedback, data.message);
+          setTimeout(() => {
+            addSystemMessage("The chat is now open. Feel free to ask anything!");
+            document.getElementById('chatInput').classList.remove('hidden');
+            currentMode = 'chat';
+          }, 1500);
+        }
+      } catch (error) {
+        showError('Failed to submit. Please try again.');
+      } finally {
+        showLoading(false);
+      }
+    }
+    async function sendMessage() {
+      const input = document.getElementById('messageInput');
+      const message = input.value.trim();
+      if (!message) return;
+      addUserMessage(message);
+      input.value = '';
+      showLoading(true);
+      try {
+        const response = await fetch(API_URL + '/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ session_id: sessionId, message: message, phase: 'free_chat' }) });
+        const data = await response.json();
+        if (data.type === 'chat_response') {
+          addBotMessage(data.message);
+        }
+      } catch (error) {
+        addBotMessage('Sorry, I encountered an error. Please try again.');
+      } finally {
+        showLoading(false);
+      }
+    }
+    function handleKeypress(event) {
+      if (event.key === 'Enter') {
+        sendMessage();
+      }
+    }
+    function showLoading(show) {
+      document.getElementById('loading').classList.toggle('hidden', !show);
+    }
+    function showError(message) {
+      const errorDiv = document.getElementById('error');
+      errorDiv.textContent = message;
+      errorDiv.classList.remove('hidden');
+      setTimeout(() => errorDiv.classList.add('hidden'), 5000);
+    }
+    function scrollToBottom() {
+      setTimeout(() => {
+        const area = document.getElementById('messagesArea');
+        area.scrollTop = area.scrollHeight;
+      }, 100);
+    }
+  </script>
+</body>
+</html>
