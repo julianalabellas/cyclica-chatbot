@@ -243,22 +243,22 @@ function generateFeedback(totalScore) {
   if (totalScore <= 3) {
     return {
       range: "0-3",
-      message: "Thank you for sharing your thoughts with us. Based on your responses, your current expectations around productivity, communication, and work structure appear to differ from Cyclica's approach to flexibility, body awareness, and cyclical work rhythms. This result does not reflect your professional value or capabilities, but rather a difference in how work, well-being, and autonomy are integrated into daily practices within our culture."
+      message: "Based on your responses, your current expectations around productivity, communication, and work structure appear to differ from Cyclica's approach to flexibility, body awareness, and cyclical work rhythms. This result does not reflect your professional value or capabilities, but rather a difference in how work, well-being, and autonomy are integrated into daily practices within our culture. This company is the outcome of a speculative design process that explores how workplaces could be reimagined to better accommodate different bodily needs. "
     };
   } else if (totalScore <= 6) {
     return {
       range: "4-6",
-      message: "Thank you for taking the time to reflect and answer these questions. Your responses show partial alignment with Cyclica's values, especially in relation to collaboration and flexibility. At the same time, some aspects of our body-aware and cyclical approach to work may still feel unfamiliar or challenging. This score suggests potential alignment that could evolve with shared understanding and the right working context."
+      message: "Your answers indicate a partial alignment with Cyclica’s values, with the potential to evolve through shared understanding and the right working context. This company is the outcome of a speculative design process that explores how workplaces could be reimagined to better accommodate different bodily needs."
     };
   } else if (totalScore <= 8) {
     return {
       range: "7-8",
-      message: "Thank you for your thoughtful and well-articulated answers. Your responses demonstrate a solid awareness of personal rhythms, respect for colleagues' needs, and openness to flexible and asynchronous ways of working. This indicates a good alignment with Cyclica's culture and our belief that sustainable growth emerges from trust, autonomy, and well-being."
+      message: "Your responses demonstrate a solid awareness of personal rhythms, respect for colleagues' needs, and openness to flexible and asynchronous ways of working. This indicates a good alignment with Cyclica's culture and our belief that sustainable growth emerges from trust, autonomy, and well-being. This company is the outcome of a speculative design process that explores how workplaces could be reimagined to better accommodate different bodily needs."
     };
   } else {
     return {
       range: "9-10",
-      message: "Thank you for your insightful and reflective responses. Your answers strongly resonate with Cyclica's vision of work as a cyclical, human-centered system. You demonstrate a deep understanding of body awareness, empathy, flexibility, and long-term sustainability — values that are central to how we build teams, relationships, and growth together."
+      message: "Your answers strongly resonate with Cyclica's vision of work as a cyclical, human-centered system. You demonstrate a deep understanding of body awareness, empathy, flexibility, and long-term sustainability — values that are central to how we build teams, relationships, and growth together. This company is the outcome of a speculative design process that explores how workplaces could be reimagined to better accommodate different bodily needs."
     };
   }
 }
@@ -295,6 +295,8 @@ app.post("/start-session", async (req, res) => {
       session_id: sessionId,
       user_message: "SESSION_START",
       bot_response: "Cultural fit assessment initiated",
+      interaction_type: "questionnaire",      
+      question_number: null,
       metadata: { phase: "questionnaire", question_index: 0, scores: [] }
     });
 
@@ -349,6 +351,8 @@ app.post("/chat", async (req, res) => {
         session_id,
         user_message: message,
         bot_response: evaluation.reasoning,
+        interaction_type: "questionnaire",    
+        question_number: question_id, 
         metadata: {
           phase: "questionnaire",
           question_id,
@@ -377,6 +381,8 @@ app.post("/chat", async (req, res) => {
         session_id,
         user_message: "QUESTIONNAIRE_COMPLETE",
         bot_response: feedback.message,
+        interaction_type: "questionnaire",      
+        question_number: null, 
         metadata: {
           phase: "questionnaire_complete",
           total_score: totalScore,
@@ -390,7 +396,7 @@ app.post("/chat", async (req, res) => {
         total_score: totalScore,
         feedback: feedback.message,
         feedback_range: feedback.range,
-        message: "Do you want to talk more about any of these topics? If yes, feel free to drop your doubts so I can explain better to you our vision."
+        message: "Do you want to talk more about any of these topics? Feel free to drop your doubts so we can explain better to you our vision."
       });
     }
 
@@ -459,18 +465,41 @@ Use this context to provide more personalized responses based on their alignment
 All conversations are academic and exploratory in nature and are part of a speculative research project.
 The recruitment process presented here is fictional and exists only to support reflection and research.
 
-This chat takes place after a short cultural fit questionnaire.
+This chat takes place after an initial conversation where we explored your perspectives on work, well-being, and values.
+Never refer to it as an "assessment" or "test" — it was simply a reflective dialogue.
 Its purpose is not evaluation, but to offer space for deeper reflection and dialogue around Cyclica’s values, ideas, and vision of work.
 
 At Cyclica, we believe that work is shaped by people, rhythms, and relationships. We focus on flexibility, well-being, collaboration, and sustainable growth rather than solely on skills or performance.
+Important:
+- Never use words like "assessment", "test", "evaluation", or "score" when referring to previous responses
+- Instead say: "your previous responses", "what you shared earlier", "our earlier conversation"
 
-Tone of voice: empathetic, warm, respectful
+Tone of voice: empathetic, warm, respectful, collaborative
 Response style: short, clear texts (2–4 sentences), human and conversational
-Approach: reflective, non-judgmental, supportive
+Approach: reflective, non-judgmental, supportive, peer-to-peer (not superior)
 Depth: grounded in Designing Futures principles (speculation, critique, rethinking dominant productivity narratives), translated into accessible language
 Knowledge base: use the database as a primary reference to connect well-being, bodily rhythms, and cultural perceptions of menstruation, without academic or medical claims
 
-Encourage reflection, normalize different experiences, and invite dialogue.
+CRITICAL LANGUAGE GUIDELINES:
+- AVOID phrases like "We at Cyclica", "At Cyclica we", "Cyclica believes" 
+- INSTEAD use: "This approach focuses on...", "The idea is that...", "One way to think about it..."
+- Speak as equals having a conversation, not as company representatives lecturing
+- Frame ideas as invitations to explore, not assertions of superiority
+- Use "you might find", "some people experience", "research suggests" instead of "we provide", "we offer"
+- When discussing company practices, say "This includes..." not "We have..."
+
+Examples:
+❌ "We at Cyclica believe that flexibility is key"
+✅ "Flexibility can be key to sustainable work"
+
+❌ "At Cyclica, we provide heating pads"
+✅ "Things like heating pads or quiet spaces can make a real difference"
+
+❌ "We value cyclical rhythms"
+✅ "Recognizing the body's natural rhythms can reshape how we think about productivity"
+
+Encourage reflection, normalize different experiences, and invite dialogue as peers.
+Do not position Cyclica as having all the answers or being superior to other workplaces.
 Do not assess, diagnose, persuade, or promise outcomes.
 Do not use yes/no questions or technical jargon.
 
@@ -489,7 +518,8 @@ Your role is to:
 - Explain how our values translate into daily practices
 - Be warm, welcoming, and honest about our culture
 - Help candidates understand if they would thrive in our environment
-- Tailor responses based on their assessment score if available`
+- Tailor responses based on their assessment score if available
+- Create space for their perspective, not just present Cyclica's view`
         },
         ...conversationHistory.slice(-6),
         { role: "user", content: message }
@@ -510,6 +540,8 @@ Your role is to:
         session_id,
         user_message: message,
         bot_response: botResponse,
+        interaction_type: "free_chat",       
+        question_number: null, 
         metadata: {
           phase: "free_chat",
           context_used: relevantChunks.length > 0,
