@@ -54,7 +54,7 @@
     .welcome-text strong {
       font-weight: 600;
     }
-
+/*
     .section-title {
       font-size: 18px;
       font-weight: 600;
@@ -62,29 +62,30 @@
       margin-bottom: 20px;
       color: #171733;
     }
-
+*/
     .consent-box {
       background: #e5e6dd;
       border-radius: 100px;
-      padding: 12px 12px;
+      padding: 6px 6px;
       text-align: center;
-      margin-bottom: 24px;
+      margin-top: 24px;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 12px;
+      font-size: 12px;
     }
 
     .consent-box::before {
       content: '✓';
-      width: 14px;
-      height: 14px;
-      border: 2px solid #171733;
+      width: 10px;
+      height: 10px;
+      border: 1px solid #171733;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 10px;
+      font-size: 8px;
       font-weight: bold;
     }
 
@@ -160,7 +161,7 @@
 
     /* Question Card */
     .question-card {
-      background: #B7C6CE;
+      background: #e4e5dd;
       border-radius: 9px;
       padding: 24px;
       margin-bottom: 12px;
@@ -194,8 +195,8 @@
     }
 
     .bot-message {
-      background: #6A92A6;
-      color: white;
+      background: #e4e5dd;
+      color: #171731;
       padding: 24px 32px;
       border-radius: 9px;
       font-size: 12px;
@@ -204,7 +205,7 @@
 
     .user-message {
       background: transparent;
-      border: 2px solid #6A92A6;
+      border: 2px solid #b5c4cc;
       color: #171733;
       padding: 24px 32px;
       border-radius: 9px;
@@ -233,7 +234,7 @@
     }
 
     .feedback-card h2 {
-      font-size: 18px;
+      font-size: 14px;
       color: #D33800;
       margin-bottom: 12px;
     }
@@ -246,9 +247,9 @@
     }
 
     .transition-text {
-      font-size: 16px;
+      font-size: 14px;
       color: #6A92A6;
-      font-style: italic;
+      font-style: bold;
     }
 
     /* Input Area */
@@ -351,22 +352,21 @@
         At Cyclica, we believe that <strong>work is shaped by people, rhythms, and relationships</strong>. Instead of focusing only on skills or past experiences, we'd like to understand how you relate to flexibility, well-being, collaboration, and sustainable growth.
       </p>
 
-      <h2 class="section-title">Choose how you'd like to begin your journey with us:</h2>
-
-      <div class="consent-box">
-        By continuing, you agree to the secure storage of this conversation for academic purposes.
-      </div>
+       
 
       <div class="choices">
         <div class="choice-card" onclick="selectOption('assessment')">
-          <h3>Take Assessment</h3>
-          <p>If you are interested in any job position, start here. This is a short talk to reflect on how your values and ways of working align with Cyclica's culture. There are no right or wrong answers, just an opportunity to share your perspective.</p>
+          <h3>Let's continue you application</h3>
+          <p>This is a <strong>short talk to reflect on how your values and ways of working align with Cyclica's culture.</strong> There are no right or wrong answers, this stage is not evaluative and not disqualifying.</p>
         </div>
 
         <div class="choice-card" onclick="selectOption('chat')">
-          <h3>Chat Freely</h3>
-          <p>If you want to learn more about this research or reflect about how menstruation is seen by society, start here. Ask questions, explore ideas, and get to know how we see work and growth at Cyclica.</p>
+          <h3>Do you still have doubts?</h3>
+          <p>That's okay, if you want to learn more about Cyclica, about this research or reflect about how menstruation is seen by society, click here. <strong>Ask questions, explore ideas, and get to know how we see work and growth at Cyclica.</strong> </p>
         </div>
+      </div>
+      <div class="consent-box">
+        By continuing, you agree to the secure storage of this conversation for academic purposes.
       </div>
     </div>
 
@@ -474,7 +474,7 @@
       const div = document.createElement('div');
       div.innerHTML = `
         <div class="feedback-card">
-          <h2>Assessment Complete</h2>
+          <h2>Thank you for sharing your thoughts with us.</h2>
           <div class="feedback-text">${feedback}</div>
           <div class="transition-text">${transition}</div>
         </div>
@@ -516,7 +516,7 @@
           addFeedback(data.feedback, data.message);
           
           setTimeout(() => {
-            addSystemMessage("The chat is now open. Feel free to ask anything!");
+            addSystemMessage("Now it's your turn, you can ask anything about Cyclica. We are happy to tell you more about it.");
             document.getElementById('chatInput').classList.remove('hidden');
             currentMode = 'chat';
           }, 1500);
