@@ -408,7 +408,7 @@ app.post("/chat", async (req, res) => {
         bot_response: feedback.message,
         interaction_type: "questionnaire",      
         question_number: null, 
-        score: null, 
+        score: totalScore, 
         metadata: {
           phase: "questionnaire_complete",
           total_score: totalScore,
