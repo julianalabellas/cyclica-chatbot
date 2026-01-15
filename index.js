@@ -46,7 +46,7 @@ Our Office Culture:
 const QUESTIONS = [
   {
     id: 1,
-    question: "Describe a moment when your energy levels affected how you worked. How did you adapt your tasks or expectations in that situation?",
+    question: "How do you adapt your tasks or expectations if your energy levels affect how you work?",
     evaluation_guide: {
       0: "Denies or ignores bodily impact on work",
       1: "Acknowledges impact but shows limited or reactive adaptation",
@@ -82,7 +82,7 @@ const QUESTIONS = [
   },
   {
     id: 5,
-    question: "How do you feel about working in environments where flexibility and asynchronous communication are encouraged? What works well for you and what is challenging?",
+    question: "How do you feel working in an environment where flexibility and autonomy are encouraged?",
     evaluation_guide: {
       0: "Strong resistance to flexibility or need for constant supervision",
       1: "Accepts flexibility with reservations or difficulty",
@@ -130,6 +130,12 @@ ${COMPANY_CONTEXT}
 Question Asked: ${question.question}
 
 Candidate's Answer: "${userAnswer}"
+
+CRITICAL: Before evaluating, check for invalid responses:
+- Repeated letters (e.g., "xxxx", "aaaa", "test test test")
+- Non-meaningful text or gibberish
+- Copy-pasted text unrelated to the question
+→ If detected, assign score 0 immediately with reasoning: "Response appears to be placeholder text or invalid input"
 
 Evaluation Guidelines (use these to assess the answer, NOT as expected answers):
 - Score 0 if: ${question.evaluation_guide[0]}
@@ -318,6 +324,24 @@ app.post("/start-session", async (req, res) => {
   }
 });
 
+// ============================================================
+// VALIDATION HELPER
+// ============================================================
+function isValidAnswer(answer) {
+  // Check for repeated characters (3+ in a row)
+  if (/(.)\1{2,}/.test(answer)) return false;
+  
+  // Check minimum length
+  if (answer.length < 10) return false;
+  
+  // Check for too many repeated words
+  const words = answer.toLowerCase().split(/\s+/);
+  const uniqueWords = new Set(words);
+  if (words.length > 5 && uniqueWords.size < words.length * 0.3) return false;
+  
+  return true;
+}
+
 // Rota principal de chat
 app.post("/chat", async (req, res) => {
   try {
@@ -326,7 +350,7 @@ app.post("/chat", async (req, res) => {
     if (!session_id || !message) {
       return res.status(400).json({ error: "session_id and message are required" });
     }
-
+    
     // ============================================================
     // FASE 1: QUESTIONÁRIO
     // ============================================================
@@ -353,6 +377,7 @@ app.post("/chat", async (req, res) => {
         bot_response: evaluation.reasoning,
         interaction_type: "questionnaire",    
         question_number: question_id, 
+        score: evaluation.score,
         metadata: {
           phase: "questionnaire",
           question_id,
@@ -383,6 +408,7 @@ app.post("/chat", async (req, res) => {
         bot_response: feedback.message,
         interaction_type: "questionnaire",      
         question_number: null, 
+        score: null, 
         metadata: {
           phase: "questionnaire_complete",
           total_score: totalScore,
@@ -542,6 +568,7 @@ Your role is to:
         bot_response: botResponse,
         interaction_type: "free_chat",       
         question_number: null, 
+        score: null,  
         metadata: {
           phase: "free_chat",
           context_used: relevantChunks.length > 0,
