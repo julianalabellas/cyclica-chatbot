@@ -6,15 +6,16 @@
       "use": "@vercel/node"
     },
     {
-      "src": "cyclica-redesigned.html",
+      "src": "fonts/**",
       "use": "@vercel/static"
     },
     {
-      "src": "chat.html",
+      "src": "*.html",
       "use": "@vercel/static"
     }
   ],
   "routes": [
+    { "src": "/fonts/(.*)", "dest": "/fonts/$1" },
     { "src": "/cyclica-redesigned.html", "dest": "/cyclica-redesigned.html" },
     { "src": "/chat.html", "dest": "/chat.html" },
     { "src": "/(.*)", "dest": "/index.js" }
