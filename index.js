@@ -118,6 +118,39 @@ async function getAvailablePDFs() {
   }
 }
 
+// ============================================================
+// HELPER: Check if should show exit message
+// ============================================================
+async function shouldShowExitMessage(sessionId) {
+  try {
+    // Check if user completed questionnaire
+    const { data: completedData } = await supabase
+      .from("chat_interactions")
+      .select("id")
+      .eq("session_id", sessionId)
+      .eq("user_message", "QUESTIONNAIRE_COMPLETE")
+      .single();
+    
+    if (!completedData) return false; // No questionnaire completed
+    
+    // Count free_chat interactions
+    const { data: freeChatData, error } = await supabase
+      .from("chat_interactions")
+      .select("id")
+      .eq("session_id", sessionId)
+      .eq("interaction_type", "free_chat");
+    
+    if (error) return false;
+    
+    // Show message after exactly 3 free_chat interactions
+    return freeChatData && freeChatData.length === 3;
+    
+  } catch (error) {
+    console.error("Error checking exit message:", error);
+    return false;
+  }
+}
+
 // Avalia resposta usando GPT e retorna score 0-2
 async function evaluateAnswer(questionId, userAnswer) {
   const question = QUESTIONS.find(q => q.id === questionId);
@@ -268,6 +301,7 @@ function generateFeedback(totalScore) {
     };
   }
 }
+
 
 // ============================================================
 // ROTAS DA API
@@ -566,9 +600,9 @@ Your role is to:
         session_id,
         user_message: message,
         bot_response: botResponse,
-        interaction_type: "free_chat",       
-        question_number: null, 
-        score: null,  
+        interaction_type: "free_chat",
+        question_number: null,
+        score: null,
         metadata: {
           phase: "free_chat",
           context_used: relevantChunks.length > 0,
@@ -576,9 +610,13 @@ Your role is to:
         }
       });
 
+      // Check if should show exit message
+      const showExit = await shouldShowExitMessage(session_id);
+
       return res.json({
         type: "chat_response",
-        message: botResponse
+        message: botResponse,
+        show_exit_message: showExit  // ← Nova flag
       });
     }
 
