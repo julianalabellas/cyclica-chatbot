@@ -582,11 +582,18 @@
           })
         });
 
-        const data = await response.json();
-        
-        if (data.type === 'chat_response') {
-          addBotMessage(data.message);
+       const data = await response.json();
+
+      if (data.type === 'chat_response') {
+        addBotMessage(data.message);
+  
+        // Show exit message if flag is true
+        if (data.show_exit_message) {
+          setTimeout(() => {
+            addSystemMessage("Hey, we just want to let you know that there's no set endpoint to this conversation. You can leave whenever you feel ready. This is a fictional project, and this job application is part of a journey that attracts people to reflect on their relationship with their bodies and workplaces. If you still want to discuss the topics on the previous questionnaire, feel free to ask.");
+          }, 1000);
         }
+      }
       } catch (error) {
         addBotMessage('Sorry, I encountered an error. Please try again.');
       } finally {
