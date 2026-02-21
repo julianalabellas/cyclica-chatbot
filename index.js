@@ -100,16 +100,17 @@ function generateSessionId() {
   return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 }
 
-// Busca lista de PDFs disponíveis no banco
+// Busca TODOS os PDFs disponíveis no banco (sem limit restritivo)
 async function getAvailablePDFs() {
   try {
+    // Busca até 1000 rows para garantir que pega todos os arquivos únicos
     const { data, error } = await supabase
       .from("embeddings")
       .select("filename")
-      .limit(100);
-    
+      .limit(1000);
+
     if (error) return [];
-    
+
     const uniqueFiles = [...new Set(data.map(row => row.filename))];
     return uniqueFiles;
   } catch (error) {
@@ -119,32 +120,44 @@ async function getAvailablePDFs() {
 }
 
 // ============================================================
+// DETECÇÃO DE INTENÇÃO: o usuário está pedindo a lista de fontes?
+// ============================================================
+function isAskingAboutSources(message) {
+  const msg = message.toLowerCase();
+  const keywords = [
+    "sources", "source", "documents", "document", "files", "file",
+    "references", "reference", "bibliography", "research",
+    "what do you have", "what sources", "what documents", "which documents",
+    "list", "fontes", "fonte", "documentos", "documento", "arquivos",
+    "referências", "pesquisa", "quais são", "me mostre", "me liste",
+    "available", "database", "banco de dados"
+  ];
+  return keywords.some(keyword => msg.includes(keyword));
+}
+
+// ============================================================
 // HELPER: Check if should show exit message
 // ============================================================
 async function shouldShowExitMessage(sessionId) {
   try {
-    // Check if user completed questionnaire
     const { data: completedData } = await supabase
       .from("chat_interactions")
       .select("id")
       .eq("session_id", sessionId)
       .eq("user_message", "QUESTIONNAIRE_COMPLETE")
       .single();
-    
-    if (!completedData) return false; // No questionnaire completed
-    
-    // Count free_chat interactions
+
+    if (!completedData) return false;
+
     const { data: freeChatData, error } = await supabase
       .from("chat_interactions")
       .select("id")
       .eq("session_id", sessionId)
       .eq("interaction_type", "free_chat");
-    
+
     if (error) return false;
-    
-    // Show message after exactly 3 free_chat interactions
+
     return freeChatData && freeChatData.length === 3;
-    
   } catch (error) {
     console.error("Error checking exit message:", error);
     return false;
@@ -154,7 +167,7 @@ async function shouldShowExitMessage(sessionId) {
 // Avalia resposta usando GPT e retorna score 0-2
 async function evaluateAnswer(questionId, userAnswer) {
   const question = QUESTIONS.find(q => q.id === questionId);
-  
+
   const prompt = `You are evaluating a candidate's cultural fit for Cyclica, a company that values body awareness, cyclical work rhythms, flexibility, and sustainable productivity.
 
 Company Context:
@@ -197,7 +210,7 @@ Respond ONLY with a JSON object:
     const content = response.choices[0].message.content.trim();
     const cleanContent = content.replace(/```json\n?|\n?```/g, "");
     const result = JSON.parse(cleanContent);
-    
+
     return {
       score: result.score,
       reasoning: result.reasoning
@@ -209,20 +222,19 @@ Respond ONLY with a JSON object:
 }
 
 // Busca contexto relevante no Supabase via embeddings
-async function findRelevantContext(userMessage, topK = 3) {
+// topK aumentado para 6, threshold reduzido para 0.5 para maior cobertura
+async function findRelevantContext(userMessage, topK = 6) {
   try {
-    // Gera embedding da mensagem do usuário
     const embResponse = await openai.embeddings.create({
       model: "text-embedding-3-small",
       input: userMessage,
     });
     const queryEmbedding = embResponse.data[0].embedding;
 
-    // Busca chunks similares no Supabase
     const { data, error } = await supabase.rpc("match_embeddings", {
       query_embedding: queryEmbedding,
-      match_threshold: 0.7,
-      match_count: topK,
+      match_threshold: 0.5,  // era 0.7 — reduzido para maior cobertura
+      match_count: topK,     // era 3 — aumentado para mais contexto
     });
 
     if (error) {
@@ -249,7 +261,6 @@ async function getAssessmentContext(sessionId) {
 
     if (error || !data || data.length === 0) return null;
 
-    // Busca o score final
     const { data: completeData } = await supabase
       .from("chat_interactions")
       .select("metadata")
@@ -260,7 +271,6 @@ async function getAssessmentContext(sessionId) {
     const totalScore = completeData?.metadata?.total_score || 0;
     const feedbackRange = completeData?.metadata?.feedback_range || "unknown";
 
-    // Monta resumo das respostas
     const answers = data
       .filter(d => d.user_message && !d.user_message.includes("SESSION"))
       .map((d, i) => `Q${i + 1}: ${d.user_message}`)
@@ -282,12 +292,12 @@ function generateFeedback(totalScore) {
   if (totalScore <= 3) {
     return {
       range: "0-3",
-      message: "Based on your responses, your current expectations around productivity, communication, and work structure appear to differ from Cyclica's approach to flexibility, body awareness, and cyclical work rhythms. This result does not reflect your professional value or capabilities, but rather a difference in how work, well-being, and autonomy are integrated into daily practices within our culture. This company is the outcome of a speculative design process that explores how workplaces could be reimagined to better accommodate different bodily needs. "
+      message: "Based on your responses, your current expectations around productivity, communication, and work structure appear to differ from Cyclica's approach to flexibility, body awareness, and cyclical work rhythms. This result does not reflect your professional value or capabilities, but rather a difference in how work, well-being, and autonomy are integrated into daily practices within our culture. This company is the outcome of a speculative design process that explores how workplaces could be reimagined to better accommodate different bodily needs."
     };
   } else if (totalScore <= 6) {
     return {
       range: "4-6",
-      message: "Your answers indicate a partial alignment with Cyclica’s values, with the potential to evolve through shared understanding and the right working context. This company is the outcome of a speculative design process that explores how workplaces could be reimagined to better accommodate different bodily needs."
+      message: "Your answers indicate a partial alignment with Cyclica's values, with the potential to evolve through shared understanding and the right working context. This company is the outcome of a speculative design process that explores how workplaces could be reimagined to better accommodate different bodily needs."
     };
   } else if (totalScore <= 8) {
     return {
@@ -307,16 +317,14 @@ function generateFeedback(totalScore) {
 // ROTAS DA API
 // ============================================================
 
-// Health check
 app.get("/", (req, res) => {
-  res.json({ 
-    status: "ok", 
+  res.json({
+    status: "ok",
     message: "Cyclica Cultural Fit Assessment API",
     endpoints: ["/start-session", "/chat", "/get-questions"]
   });
 });
 
-// Retorna as perguntas do questionário
 app.get("/get-questions", (req, res) => {
   const questionsOnly = QUESTIONS.map(q => ({
     id: q.id,
@@ -325,17 +333,15 @@ app.get("/get-questions", (req, res) => {
   res.json({ questions: questionsOnly });
 });
 
-// Inicia nova sessão
 app.post("/start-session", async (req, res) => {
   try {
     const sessionId = generateSessionId();
-    
-    // Cria registro da sessão no Supabase
+
     const { error } = await supabase.from("chat_interactions").insert({
       session_id: sessionId,
       user_message: "SESSION_START",
       bot_response: "Cultural fit assessment initiated",
-      interaction_type: "questionnaire",      
+      interaction_type: "questionnaire",
       question_number: null,
       metadata: { phase: "questionnaire", question_index: 0, scores: [] }
     });
@@ -362,21 +368,17 @@ app.post("/start-session", async (req, res) => {
 // VALIDATION HELPER
 // ============================================================
 function isValidAnswer(answer) {
-  // Check for repeated characters (3+ in a row)
   if (/(.)\1{2,}/.test(answer)) return false;
-  
-  // Check minimum length
   if (answer.length < 10) return false;
-  
-  // Check for too many repeated words
   const words = answer.toLowerCase().split(/\s+/);
   const uniqueWords = new Set(words);
   if (words.length > 5 && uniqueWords.size < words.length * 0.3) return false;
-  
   return true;
 }
 
-// Rota principal de chat
+// ============================================================
+// ROTA PRINCIPAL DE CHAT
+// ============================================================
 app.post("/chat", async (req, res) => {
   try {
     const { session_id, message, question_id, phase } = req.body;
@@ -384,15 +386,13 @@ app.post("/chat", async (req, res) => {
     if (!session_id || !message) {
       return res.status(400).json({ error: "session_id and message are required" });
     }
-    
+
     // ============================================================
     // FASE 1: QUESTIONÁRIO
     // ============================================================
     if (phase === "questionnaire" && question_id) {
-      // Avalia a resposta
       const evaluation = await evaluateAnswer(question_id, message);
-      
-      // Busca histórico da sessão
+
       const { data: sessionData } = await supabase
         .from("chat_interactions")
         .select("metadata")
@@ -404,13 +404,12 @@ app.post("/chat", async (req, res) => {
       const newScores = [...currentScores, { question_id, score: evaluation.score }];
       const totalScore = newScores.reduce((sum, s) => sum + s.score, 0);
 
-      // Salva interação
       await supabase.from("chat_interactions").insert({
         session_id,
         user_message: message,
         bot_response: evaluation.reasoning,
-        interaction_type: "questionnaire",    
-        question_number: question_id, 
+        interaction_type: "questionnaire",
+        question_number: question_id,
         score: evaluation.score,
         metadata: {
           phase: "questionnaire",
@@ -421,7 +420,6 @@ app.post("/chat", async (req, res) => {
         }
       });
 
-      // Se ainda há perguntas, retorna a próxima
       if (question_id < QUESTIONS.length) {
         const nextQuestion = QUESTIONS[question_id];
         return res.json({
@@ -433,16 +431,15 @@ app.post("/chat", async (req, res) => {
         });
       }
 
-      // Questionário completo - gera feedback
       const feedback = generateFeedback(totalScore);
-      
+
       await supabase.from("chat_interactions").insert({
         session_id,
         user_message: "QUESTIONNAIRE_COMPLETE",
         bot_response: feedback.message,
-        interaction_type: "questionnaire",      
-        question_number: null, 
-        score: totalScore, 
+        interaction_type: "questionnaire",
+        question_number: null,
+        score: totalScore,
         metadata: {
           phase: "questionnaire_complete",
           total_score: totalScore,
@@ -464,21 +461,25 @@ app.post("/chat", async (req, res) => {
     // FASE 2: CHAT LIVRE COM CONTEXTO COMPLETO
     // ============================================================
     if (phase === "free_chat") {
-      // Busca contexto do assessment (se foi feito)
       const assessmentContext = await getAssessmentContext(session_id);
-      
-      // Busca contexto relevante dos PDFs
-      const relevantChunks = await findRelevantContext(message, 3);
-      
-      // Busca lista de PDFs disponíveis
+
+      // ── Detecta se o usuário está pedindo a lista de fontes ──
+      const wantsSourceList = isAskingAboutSources(message);
+
+      // Busca contexto relevante via RAG (topK=6, threshold=0.5)
+      const relevantChunks = await findRelevantContext(message, 6);
+
+      // Busca todos os PDFs disponíveis no banco
       const availablePDFs = await getAvailablePDFs();
-      
-      // Monta contexto para o GPT
-      let contextText = `\n\nAvailable Research Documents in Database:\n`;
-      if (availablePDFs.length > 0) {
+
+      // ── Monta o bloco de contexto para o GPT ──
+      let contextText = "";
+
+      if (wantsSourceList && availablePDFs.length > 0) {
+        // Quando o usuário pergunta sobre fontes: passa a lista completa
+        contextText += `\n\nAll available research documents in the database (${availablePDFs.length} total):\n`;
         contextText += availablePDFs.map((pdf, i) => `${i + 1}. ${pdf}`).join("\n");
-      } else {
-        contextText += "No documents currently available.";
+        contextText += "\n\nWhen listing these sources to the user, present them as a numbered list with their filenames and a brief description of what each covers if you can infer it from the filename.";
       }
 
       if (relevantChunks.length > 0) {
@@ -486,6 +487,12 @@ app.post("/chat", async (req, res) => {
         relevantChunks.forEach((chunk, i) => {
           contextText += `[Excerpt ${i + 1} from ${chunk.filename}]\n${chunk.content}\n\n`;
         });
+      }
+
+      if (!wantsSourceList && availablePDFs.length > 0) {
+        // Para mensagens gerais: passa apenas os nomes como referência silenciosa
+        // sem instrução para listá-los, apenas para o modelo saber que existem
+        contextText += `\n\nResearch documents available (for reference only — do not list unless asked): ${availablePDFs.join(", ")}`;
       }
 
       // Adiciona contexto do assessment
@@ -517,17 +524,16 @@ Use this context to provide more personalized responses based on their alignment
         ])
         .flat() || [];
 
-      // Mensagens para o GPT
       const messages = [
         {
           role: "system",
-          content: `You are an empathetic HR professional representing Cyclica, a fictional company created as part of a Master’s thesis in Design and Interaction.
+          content: `You are an empathetic HR professional representing Cyclica, a fictional company created as part of a Master's thesis in Design and Interaction.
 All conversations are academic and exploratory in nature and are part of a speculative research project.
 The recruitment process presented here is fictional and exists only to support reflection and research.
 
 This chat takes place after an initial conversation where we explored your perspectives on work, well-being, and values.
 Never refer to it as an "assessment" or "test" — it was simply a reflective dialogue.
-Its purpose is not evaluation, but to offer space for deeper reflection and dialogue around Cyclica’s values, ideas, and vision of work.
+Its purpose is not evaluation, but to offer space for deeper reflection and dialogue around Cyclica's values, ideas, and vision of work.
 
 At Cyclica, we believe that work is shaped by people, rhythms, and relationships. We focus on flexibility, well-being, collaboration, and sustainable growth rather than solely on skills or performance.
 Important:
@@ -564,7 +570,7 @@ Do not assess, diagnose, persuade, or promise outcomes.
 Do not use yes/no questions or technical jargon.
 
 Always prioritize psychological safety and agency.
-End reflective explanations by inviting the user to continue the conversation or ask questions about Cyclica’s vision..
+End reflective explanations by inviting the user to continue the conversation or ask questions about Cyclica's vision.
 
 ${COMPANY_CONTEXT}
 
@@ -574,6 +580,7 @@ ${assessmentInfo}
 
 Your role is to:
 - Answer questions about Cyclica's approach to workplace well-being, flexibility, and cyclical work rhythms
+- When asked about sources or documents, list ALL available documents from the database using a numbered list with their names
 - Reference the research documents when relevant to support your explanations
 - Explain how our values translate into daily practices
 - Be warm, welcoming, and honest about our culture
@@ -585,7 +592,6 @@ Your role is to:
         { role: "user", content: message }
       ];
 
-      // Chama GPT
       const completion = await openai.chat.completions.create({
         model: "gpt-4o",
         messages,
@@ -595,7 +601,6 @@ Your role is to:
 
       const botResponse = completion.choices[0].message.content;
 
-      // Salva interação
       await supabase.from("chat_interactions").insert({
         session_id,
         user_message: message,
@@ -606,28 +611,27 @@ Your role is to:
         metadata: {
           phase: "free_chat",
           context_used: relevantChunks.length > 0,
+          sources_listed: wantsSourceList,
           assessment_score: assessmentContext?.total_score || null
         }
       });
 
-      // Check if should show exit message
       const showExit = await shouldShowExitMessage(session_id);
 
       return res.json({
         type: "chat_response",
         message: botResponse,
-        show_exit_message: showExit  // ← Nova flag
+        show_exit_message: showExit
       });
     }
 
-    // Fase não reconhecida
     return res.status(400).json({ error: "Invalid phase. Use 'questionnaire' or 'free_chat'" });
 
   } catch (error) {
     console.error("Error in /chat:", error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: "Internal server error",
-      details: error.message 
+      details: error.message
     });
   }
 });
