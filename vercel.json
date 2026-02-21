@@ -16,6 +16,7 @@
   ],
   "routes": [
     { "src": "/fonts/(.*)", "dest": "/fonts/$1" },
+    { "src": "/cyclica-interface.html", "dest": "/cyclica-interface.html" },
     { "src": "/cyclica-redesigned.html", "dest": "/cyclica-redesigned.html" },
     { "src": "/chat.html", "dest": "/chat.html" },
     { "src": "/(.*)", "dest": "/index.js" }
