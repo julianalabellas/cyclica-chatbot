@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cyclica - Selection Process</title>
+  <style>
+    /* ========== FONTS: AEONIK (Base font) ========== */
+    @font-face {
+      font-family: 'Aeonik';
+      src: url('https://cyclica-chatbot-9vto.vercel.app/fonts/Aeonik-Regular.ttf') format('truetype');
+      font-weight: 400;
+      font-style: normal;
+    }
+
+    @font-face {
+      font-family: 'Aeonik';
+      src: url('https://cyclica-chatbot-9vto.vercel.app/fonts/Aeonik-Bold.ttf') format('truetype');
+      font-weight: 700;
+      font-style: normal;
+    }
+
+    /* ========== FONTS: PINK AVERAGE (Italic titles) ========== */
+    @font-face {
+      font-family: 'Pink Average';
+      src: url('https://cyclica-chatbot-9vto.vercel.app/fonts/PinkAverage-Regular.otf') format('opentype'),
+           url('https://cyclica-chatbot-9vto.vercel.app/fonts/PinkAverage-Regular.ttf') format('truetype');
+      font-weight: 400;
+      font-style: normal;
+    }
+
+    @font-face {
+      font-family: 'Pink Average';
+      src: url('https://cyclica-chatbot-9vto.vercel.app/fonts/PinkAverage-Italic.otf') format('opentype'),
+           url('https://cyclica-chatbot-9vto.vercel.app/fonts/PinkAverage-Italic.ttf') format('truetype');
+      font-weight: 400;
+      font-style: italic;
+    }
+
+    /* ========== GLOBAL STYLES ========== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Aeonik', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #FFF7E7;
+      color: #171733;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .chat-box {
+      width: 100%;
+      max-width: 1200px;
+      min-height: 100vh;
+      background: #FFF7E7;
+      padding: 40px 60px;
+    }
+
+    /* ========== WELCOME SCREEN ========== */
+    .welcome-screen {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 60px 0;
+    }
+
+    .welcome-title {
+      font-family: 'Pink Average', Georgia, serif;
+      font-style: italic;
+      font-size: 56px;
+      color: #6A92A6;
+      text-align: center;
+      margin-bottom: 40px;
+      line-height: 1.2;
+    }
+
+    .welcome-text {
+      text-align: center;
+      font-size: 18px;
+      line-height: 1.7;
+      margin-bottom: 60px;
+      color: #171733;
+    }
+
+    .welcome-text strong {
+      font-weight: 600;
+    }
+
+    .consent-box {
+      background: #e5e6dd;
+      border-radius: 100px;
+      padding: 14px 28px;
+      text-align: center;
+      margin-top: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      font-size: 15px;
+    }
+
+    .consent-box::before {
+      content: '✓';
+      width: 22px;
+      height: 22px;
+      border: 2px solid #171733;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    .choices {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      margin-bottom: 20px;
+    }
+
+    .choice-card {
+      background: #FFF7E7;
+      border: 3px solid #D33800;
+      border-radius: 16px;
+      padding: 32px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+    }
+
+    .choice-card:hover {
+      background: rgba(243, 187, 179, 0.5);
+      transform: translateY(-4px);
+      box-shadow: 0 8px 20px rgba(211, 56, 0, 0.15);
+    }
+
+    .choice-card h3 {
+      font-size: 26px;
+      color: #D33800;
+      margin-bottom: 16px;
+      font-weight: 700;
+    }
+
+    .choice-card p {
+      font-size: 16px;
+      line-height: 1.6;
+      color: #171733;
+    }
+
+    /* ========== CHAT INTERFACE ========== */
+    .chat-interface {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      min-height: calc(100vh - 80px);
+      position: relative;
+    }
+
+    .messages-area {
+      flex: 1;
+      overflow-y: auto;
+      padding-bottom: 120px; /* Space for fixed input */
+      padding-right: 20px;
+    }
+
+    .messages-area::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    .messages-area::-webkit-scrollbar-track {
+      background: #E0D5C3;
+      border-radius: 10px;
+    }
+
+    .messages-area::-webkit-scrollbar-thumb {
+      background: #6A92A6;
+      border-radius: 10px;
+    }
+
+    .messages-area::-webkit-scrollbar-thumb:hover {
+      background: #5a8296;
+    }
+
+    /* ========== QUESTION CARD ========== */
+    .question-card {
+      background: #e4e5dd;
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 20px;
+    }
+
+    .question-number {
+      font-size: 15px;
+      font-weight: 600;
+      color: #171733;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .question-text {
+      font-size: 17px;
+      line-height: 1.6;
+      color: #171733;
+    }
+
+    /* ========== MESSAGES ========== */
+    .message {
+      margin-bottom: 16px;
+      max-width: 75%;
+      animation: fadeIn 0.3s ease;
+      position: relative;
+      z-index: 1; /* Ensure messages appear above other content */
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .bot-message {
+      background: #e4e5dd;
+      color: #171733;
+      padding: 20px 28px;
+      border-radius: 16px;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    .user-message {
+      background: transparent;
+      border: 3px solid #b5c4cc;
+      color: #171733;
+      padding: 20px 28px;
+      border-radius: 16px;
+      font-size: 16px;
+      line-height: 1.6;
+      margin-left: auto;
+    }
+
+    .system-message {
+      text-align: center;
+      color: #6A92A6;
+      font-weight: 600;
+      font-size: 16px;
+      margin: 32px auto;
+      max-width: 650px;
+      line-height: 1.5;
+    }
+
+    /* ========== FEEDBACK CARD ========== */
+    .feedback-card {
+      background: #e5e6dd;
+      border: 3px solid #6A92A6;
+      border-radius: 16px;
+      padding: 36px;
+      text-align: center;
+      margin: 32px 0;
+    }
+
+    .feedback-card h2 {
+      font-size: 22px;
+      color: #D33800;
+      margin-bottom: 20px;
+      font-weight: 700;
+    }
+
+    .feedback-text {
+      font-size: 16px;
+      line-height: 1.7;
+      color: #171733;
+      margin-bottom: 20px;
+    }
+
+    .transition-text {
+      font-size: 17px;
+      color: #6A92A6;
+      font-weight: 600;
+      margin-top: 12px;
+    }
+
+    /* ========== INPUT AREA (FIXED AT BOTTOM) ========== */
+    .input-area {
+      background: white;
+      border: 3px solid #6A92A6;
+      border-radius: 16px;
+      padding: 12px 12px 12px 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: fixed;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: calc(100% - 120px);
+      max-width: 900px;
+      z-index: 1000; /* Highest z-index to stay on top */
+      box-shadow: 0 -6px 20px rgba(23, 23, 51, 0.12);
+    }
+
+    .input-area input,
+    .input-area textarea {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-family: 'Aeonik', sans-serif;
+      font-size: 16px;
+      color: #171733;
+      background: transparent;
+      resize: none;
+      padding: 12px 0;
+      line-height: 1.5;
+    }
+
+    .input-area input::placeholder,
+    .input-area textarea::placeholder {
+      color: #B7C6CE;
+    }
+
+    .send-button {
+      width: 56px;
+      height: 56px;
+      background: linear-gradient(135deg, #D33800 0%, #EE6A43 100%);
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s;
+      flex-shrink: 0;
+    }
+
+    .send-button:hover {
+      transform: scale(1.08);
+    }
+
+    .send-button:active {
+      transform: scale(0.95);
+    }
+
+    .send-button::after {
+      content: '→';
+      color: white;
+      font-size: 28px;
+      font-weight: bold;
+    }
+
+    /* ========== LOADING INDICATOR ========== */
+    .loading {
+      text-align: center;
+      color: #6A92A6;
+      font-style: italic;
+      padding: 20px;
+      font-size: 16px;
+    }
+
+    .loading::after {
+      content: '...';
+      animation: dots 1.5s infinite;
+    }
+
+    @keyframes dots {
+      0%, 20% { content: '.'; }
+      40% { content: '..'; }
+      60%, 100% { content: '...'; }
+    }
+
+    /* ========== ERROR MESSAGE ========== */
+    .error {
+      background: rgba(211, 56, 0, 0.1);
+      border: 3px solid #D33800;
+      border-radius: 16px;
+      padding: 20px;
+      color: #D33800;
+      text-align: center;
+      margin: 24px 0;
+      font-size: 16px;
+    }
+
+    /* ========== UTILITY CLASSES ========== */
+    .hidden {
+      display: none;
+    }
+
+    /* ========== RESPONSIVE DESIGN ========== */
+    @media (max-width: 768px) {
+      .chat-box {
+        padding: 20px;
+      }
+
+      .welcome-title {
+        font-size: 36px;
+      }
+
+      .welcome-text {
+        font-size: 16px;
+      }
+
+      .choices {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+
+      .choice-card h3 {
+        font-size: 22px;
+      }
+
+      .choice-card p {
+        font-size: 15px;
+      }
+
+      .input-area {
+        width: calc(100% - 40px);
+        bottom: 20px;
+      }
+
+      .messages-area {
+        padding-bottom: 140px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-box">
+    <!-- Welcome Screen -->
+    <div id="welcomeScreen" class="welcome-screen">
+      <h1 class="welcome-title">We're happy you're here.</h1>
+      
+      <p class="welcome-text">
+        At Cyclica, we believe that <strong>work is shaped by people, rhythms, and relationships</strong>. Instead of focusing only on skills or past experiences, we'd like to understand how you relate to flexibility, well-being, collaboration, and sustainable growth.
+      </p>
+
+      <div class="choices">
+        <div class="choice-card" onclick="selectOption('assessment')">
+          <h3>Let's continue your application</h3>
+          <p>This is a <strong>short talk to reflect on how your values and ways of working align with Cyclica's culture.</strong> There are no right or wrong answers; this stage is not evaluative and not disqualifying.</p>
+        </div>
+
+        <div class="choice-card" onclick="selectOption('chat')">
+          <h3>Do you still have doubts?</h3>
+          <p>That's okay, if you want to learn more about Cyclica, about this research, or reflect on how menstruation is seen by society, click here. <strong>Ask questions, explore ideas, and get to know how we see work and growth at Cyclica.</strong></p>
+        </div>
+      </div>
+
+      <div class="consent-box">
+        By continuing, you agree to the secure storage of this conversation for academic purposes.
+      </div>
+    </div>
+
+    <!-- Error Message -->
+    <div id="error" class="error hidden"></div>
+
+    <!-- Loading Indicator -->
+    <div id="loading" class="loading hidden">Processing your answer</div>
+
+    <!-- Chat Interface -->
+    <div id="chatInterface" class="chat-interface hidden">
+      <div class="messages-area" id="messagesArea"></div>
+
+      <!-- Assessment Input (Fixed at bottom) -->
+      <div id="assessmentInput" class="input-area hidden">
+        <textarea id="answerInput" placeholder="Share your thoughts." rows="1"></textarea>
+        <button class="send-button" onclick="submitAnswer()" aria-label="Submit answer"></button>
+      </div>
+
+      <!-- Chat Input (Fixed at bottom) -->
+      <div id="chatInput" class="input-area hidden">
+        <input type="text" id="messageInput" placeholder="Share your thoughts." onkeypress="handleKeypress(event)" />
+        <button class="send-button" onclick="sendMessage()" aria-label="Send message"></button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API_URL = 'https://cyclica-chatbot-9vto.vercel.app';
+    let sessionId = null;
+    let currentMode = null;
+    let currentQuestionId = 0;
+    let totalQuestions = 5;
+
+    // Select interaction mode (assessment or free chat)
+    async function selectOption(mode) {
+      currentMode = mode;
+      document.getElementById('welcomeScreen').classList.add('hidden');
+      document.getElementById('chatInterface').classList.remove('hidden');
+
+      try {
+        const response = await fetch(API_URL + '/start-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        
+        const data = await response.json();
+        sessionId = data.session_id;
+        totalQuestions = data.total_questions;
+
+        if (mode === 'assessment') {
+          currentQuestionId = 1;
+          addQuestion(data.first_question, 1);
+          document.getElementById('assessmentInput').classList.remove('hidden');
+        } else {
+          addSystemMessage("Welcome! Feel free to ask me anything about Cyclica's culture, values, or work environment.");
+          document.getElementById('chatInput').classList.remove('hidden');
+        }
+      } catch (error) {
+        showError('Failed to start session. Please try again.');
+      }
+    }
+
+    // Add question card to chat
+    function addQuestion(text, num) {
+      const area = document.getElementById('messagesArea');
+      const div = document.createElement('div');
+      div.innerHTML = `
+        <div class="question-card">
+          <div class="question-number">Question ${num} of ${totalQuestions}:</div>
+          <div class="question-text">${text}</div>
+        </div>
+      `;
+      area.appendChild(div);
+      scrollToBottom();
+    }
+
+    // Add user message to chat
+    function addUserMessage(text) {
+      const area = document.getElementById('messagesArea');
+      const div = document.createElement('div');
+      div.className = 'message user-message';
+      div.textContent = text;
+      area.appendChild(div);
+      scrollToBottom();
+    }
+
+    // Add bot message to chat
+    function addBotMessage(text) {
+      const area = document.getElementById('messagesArea');
+      const div = document.createElement('div');
+      div.className = 'message bot-message';
+      div.textContent = text;
+      area.appendChild(div);
+      scrollToBottom();
+    }
+
+    // Add system message to chat
+    function addSystemMessage(text) {
+      const area = document.getElementById('messagesArea');
+      const div = document.createElement('div');
+      div.className = 'message system-message';
+      div.textContent = text;
+      area.appendChild(div);
+      scrollToBottom();
+    }
+
+    // Add feedback card after assessment completion
+    function addFeedback(feedback, transition) {
+      const area = document.getElementById('messagesArea');
+      const div = document.createElement('div');
+      div.innerHTML = `
+        <div class="feedback-card">
+          <h2>Thank you for sharing your thoughts with us.</h2>
+          <div class="feedback-text">${feedback}</div>
+          <div class="transition-text">${transition}</div>
+        </div>
+      `;
+      area.appendChild(div);
+      scrollToBottom();
+    }
+
+    // Submit assessment answer
+    async function submitAnswer() {
+      const answer = document.getElementById('answerInput').value.trim();
+      if (!answer) {
+        alert('Please provide an answer before submitting.');
+        return;
+      }
+
+      addUserMessage(answer);
+      document.getElementById('answerInput').value = '';
+      showLoading(true);
+
+      try {
+        const response = await fetch(API_URL + '/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            session_id: sessionId,
+            message: answer,
+            question_id: currentQuestionId,
+            phase: 'questionnaire'
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.type === 'next_question') {
+          currentQuestionId++;
+          addQuestion(data.question, currentQuestionId);
+        } else if (data.type === 'questionnaire_complete') {
+          document.getElementById('assessmentInput').classList.add('hidden');
+          addFeedback(data.feedback, data.message);
+          
+          setTimeout(() => {
+            addSystemMessage("Now it's your turn, you can ask anything about Cyclica. We are happy to tell you more about it.");
+            document.getElementById('chatInput').classList.remove('hidden');
+            currentMode = 'chat';
+          }, 1500);
+        }
+      } catch (error) {
+        showError('Failed to submit. Please try again.');
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    // Send free chat message
+    async function sendMessage() {
+      const input = document.getElementById('messageInput');
+      const message = input.value.trim();
+      if (!message) return;
+
+      addUserMessage(message);
+      input.value = '';
+      showLoading(true);
+
+      try {
+        const response = await fetch(API_URL + '/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            session_id: sessionId,
+            message: message,
+            phase: 'free_chat'
+          })
+        });
+
+        const data = await response.json();
+
+        if (data.type === 'chat_response') {
+          addBotMessage(data.message);
+  
+          // Show exit message after 3 interactions (if user completed assessment)
+          if (data.show_exit_message) {
+            setTimeout(() => {
+              addSystemMessage("Hey, we just want to let you know that there's no set endpoint to this conversation. You can leave whenever you feel ready. This is a fictional project, and this job application is part of a journey that attracts people to reflect on their relationship with their bodies and workplaces. If you still want to discuss the topics on the previous questionnaire, feel free to ask.");
+            }, 1000);
+          }
+        }
+      } catch (error) {
+        addBotMessage('Sorry, I encountered an error. Please try again.');
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    // Handle Enter key press in chat input
+    function handleKeypress(event) {
+      if (event.key === 'Enter') {
+        sendMessage();
+      }
+    }
+
+    // Toggle loading indicator
+    function showLoading(show) {
+      document.getElementById('loading').classList.toggle('hidden', !show);
+    }
+
+    // Display error message
+    function showError(message) {
+      const errorDiv = document.getElementById('error');
+      errorDiv.textContent = message;
+      errorDiv.classList.remove('hidden');
+      setTimeout(() => errorDiv.classList.add('hidden'), 5000);
+    }
+
+    // Scroll chat to bottom
+    function scrollToBottom() {
+      setTimeout(() => {
+        const area = document.getElementById('messagesArea');
+        area.scrollTop = area.scrollHeight;
+      }, 100);
+    }
+  </script>
+</body>
+</html>
