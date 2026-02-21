@@ -42,7 +42,8 @@
       font-family: 'Aeonik', -apple-system, BlinkMacSystemFont, sans-serif;
       background: #FFF7E7;
       color: #171733;
-      min-height: 100vh;
+      height: 100vh;
+      overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -51,9 +52,10 @@
     .chat-box {
       width: 100%;
       max-width: 1100px;
-      min-height: 100vh;
+      height: 100vh;
       background: #FFF7E7;
       padding: 24px 48px;
+      overflow: hidden;
     }
 
     /* ========== WELCOME SCREEN ========== */
@@ -61,6 +63,8 @@
       max-width: 800px;
       margin: 0 auto;
       padding: 32px 0;
+      overflow-y: auto;
+      max-height: calc(100vh - 48px);
     }
 
     .welcome-title {
@@ -154,15 +158,16 @@
       margin: 0 auto;
       display: flex;
       flex-direction: column;
-      min-height: calc(100vh - 48px);
+      height: calc(100vh - 48px);
       position: relative;
     }
 
     .messages-area {
       flex: 1;
       overflow-y: auto;
-      padding-bottom: 90px;
       padding-right: 16px;
+      /* Bottom padding ensures last message never hides behind input+loading */
+      padding-bottom: 16px;
     }
 
     .messages-area::-webkit-scrollbar {
@@ -290,14 +295,11 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      position: fixed;
-      bottom: 28px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: calc(100% - 96px);
-      max-width: 800px;
-      z-index: 1000;
+      flex-shrink: 0;
+      width: 100%;
+      z-index: 100;
       box-shadow: 0 -4px 16px rgba(23, 23, 51, 0.10);
+      margin-bottom: 28px;
     }
 
     .input-area input,
@@ -353,8 +355,9 @@
       text-align: center;
       color: #6A92A6;
       font-style: italic;
-      padding: 14px;
-      font-size: 14px;
+      font-size: 13px;
+      padding: 6px 0 8px;
+      flex-shrink: 0;
     }
 
     .loading::after {
@@ -413,12 +416,11 @@
       }
 
       .input-area {
-        width: calc(100% - 32px);
-        bottom: 16px;
+        margin-bottom: 16px;
       }
 
       .messages-area {
-        padding-bottom: 110px;
+        padding-bottom: 8px;
       }
     }
   </style>
@@ -453,20 +455,20 @@
     <!-- Error Message -->
     <div id="error" class="error hidden"></div>
 
-    <!-- Loading Indicator -->
-    <div id="loading" class="loading hidden">Processing your answer</div>
-
     <!-- Chat Interface -->
     <div id="chatInterface" class="chat-interface hidden">
       <div class="messages-area" id="messagesArea"></div>
 
-      <!-- Assessment Input (Fixed at bottom) -->
+      <!-- Loading Indicator (between messages and input) -->
+      <div id="loading" class="loading hidden">Processing your answer</div>
+
+      <!-- Assessment Input -->
       <div id="assessmentInput" class="input-area hidden">
         <textarea id="answerInput" placeholder="Share your thoughts." rows="1"></textarea>
         <button class="send-button" onclick="submitAnswer()" aria-label="Submit answer"></button>
       </div>
 
-      <!-- Chat Input (Fixed at bottom) -->
+      <!-- Chat Input -->
       <div id="chatInput" class="input-area hidden">
         <input type="text" id="messageInput" placeholder="Share your thoughts." onkeypress="handleKeypress(event)" />
         <button class="send-button" onclick="sendMessage()" aria-label="Send message"></button>
