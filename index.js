@@ -599,7 +599,9 @@ Your role is to:
         // Quando o usuário pede a lista de fontes, aumenta o limite para
         // garantir que todos os 22 arquivos sejam listados sem corte.
         // Para respostas normais de chat, 500 tokens continua suficiente.
-        max_tokens: wantsSourceList ? 1500 : 500
+        // Quando lista fontes, remove o limite para nunca cortar a resposta.
+        // Para chat normal, mantém 500 para respostas curtas e conversacionais.
+        ...(wantsSourceList ? {} : { max_tokens: 500 })
       });
 
       const botResponse = completion.choices[0].message.content;
