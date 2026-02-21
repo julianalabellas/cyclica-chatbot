@@ -596,7 +596,10 @@ Your role is to:
         model: "gpt-4o",
         messages,
         temperature: 0.7,
-        max_tokens: 500
+        // Quando o usuário pede a lista de fontes, aumenta o limite para
+        // garantir que todos os 22 arquivos sejam listados sem corte.
+        // Para respostas normais de chat, 500 tokens continua suficiente.
+        max_tokens: wantsSourceList ? 1500 : 500
       });
 
       const botResponse = completion.choices[0].message.content;
